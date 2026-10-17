@@ -7,13 +7,17 @@ const router = express.Router();
 router.get("/login", (req, res) => res.render("users/login"));
 router.get("/signup", (req, res) => res.render("users/signup"));
 
-router.post("/login", passport.authenticate("local", {
-  failureRedirect: "/auth/login",
-  failureFlash: true,
-}), (req, res) => {
-  res.redirect(req.session.redirectUrl || "/shortlist");
-  delete req.session.redirectUrl;
-});
+router.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/auth/login",
+    failureFlash: true,
+  }),
+  (req, res) => {
+    res.redirect(req.session.redirectUrl || "/shortlist");
+    delete req.session.redirectUrl;
+  },
+);
 
 router.post("/signup", async (req, res, next) => {
   try {

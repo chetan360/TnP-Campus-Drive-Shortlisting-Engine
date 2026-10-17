@@ -42,9 +42,6 @@ main()
 
 const store = MongoStore.create({
   mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
   touchAfter: 24 * 3600,
 });
 
@@ -75,17 +72,19 @@ app.use((req, res, next) => {
   next();
 });
 
-passport.use(new LocalStrategy(async (username, password, done) => {
-  try {
-    const user = await User.findOne({ username });
-    if (!user || !(await user.verifyPassword(password))) {
-      return done(null, false, { message: "Invalid username or password" });
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await User.findOne({ username });
+      if (!user || !(await user.verifyPassword(password))) {
+        return done(null, false, { message: "Invalid username or password" });
+      }
+      return done(null, user);
+    } catch (err) {
+      return done(err);
     }
-    return done(null, user);
-  } catch (err) {
-    return done(err);
-  }
-}));
+  }),
+);
 
 if (
   process.env.GOOGLE_CLIENT_ID &&
@@ -148,5 +147,9 @@ if (require.main === module) {
     console.log("server is listening on 3000");
   });
 }
+
+app.get("/", (req, res) => {
+  res.render("home");
+});
 
 module.exports = app;

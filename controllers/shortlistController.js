@@ -12,9 +12,12 @@ const shortlistStudents = async (req, res) => {
   try {
     const values = {};
     for (const [name, min, max] of criteria) {
-      const value = req.body[name] === undefined || req.body[name] === ""
-        ? name === "maxBacklogs" ? 0 : min
-        : Number(req.body[name]);
+      const value =
+        req.body[name] === undefined || req.body[name] === ""
+          ? name === "maxBacklogs"
+            ? 0
+            : min
+          : Number(req.body[name]);
       if (!Number.isFinite(value) || value < min || value > max) {
         return res.status(400).json({
           success: false,
@@ -32,7 +35,10 @@ const shortlistStudents = async (req, res) => {
       activeBacklogs: { $lte: values.maxBacklogs },
     };
 
-    const shortlisted = await Student.find(query).sort({ ugCgpa: -1, pgCgpa: -1 });
+    const shortlisted = await Student.find(query).sort({
+      ugCgpa: -1,
+      pgCgpa: -1,
+    });
 
     return res.status(200).json({
       success: true,

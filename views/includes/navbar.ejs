@@ -1,0 +1,10 @@
+<nav class="navbar navbar-light bg-light mb-3">
+  <div class="container">
+    <a class="navbar-brand" href="/shortlist">Campus Shortlisting</a>
+    <% if (currentUser) { %>
+      <form action="/auth/logout" method="POST">
+        <button class="btn btn-outline-secondary" type="submit">Log out</button>
+      </form>
+    <% } %>
+  </div>
+</nav>

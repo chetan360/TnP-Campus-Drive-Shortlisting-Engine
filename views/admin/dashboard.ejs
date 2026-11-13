@@ -1,0 +1,152 @@
+<% layout("./layouts/boilerplate") %>
+
+<div class="container py-4">
+  <!-- Dashboard Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+      <h2 class="fw-bold mb-1">TnP Admin Dashboard</h2>
+      <p class="text-muted mb-0">Manage placement drives, review candidates, and run shortlisting</p>
+    </div>
+    <div class="mt-2 mt-md-0">
+      <a href="/drives/new" class="btn btn-primary rounded-3 shadow-sm me-2">
+        <i class="fa-solid fa-plus me-1"></i> Create Drive
+      </a>
+      <a href="/shortlist" class="btn btn-outline-primary rounded-3">
+        <i class="fa-solid fa-filter me-1"></i> Shortlist Tool
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm rounded-3 bg-white">
+        <div class="card-body p-3 d-flex align-items-center">
+          <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-3 me-3 fs-3">
+            <i class="fa-solid fa-building"></i>
+          </div>
+          <div>
+            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Total Drives</h6>
+            <h3 class="fw-bold mb-0"><%= totalDrives %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm rounded-3 bg-white">
+        <div class="card-body p-3 d-flex align-items-center">
+          <div class="rounded-3 bg-success bg-opacity-10 text-success p-3 me-3 fs-3">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Active Drives</h6>
+            <h3 class="fw-bold mb-0"><%= activeDrivesCount %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm rounded-3 bg-white">
+        <div class="card-body p-3 d-flex align-items-center">
+          <div class="rounded-3 bg-info bg-opacity-10 text-info p-3 me-3 fs-3">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div>
+            <h6 class="text-muted mb-1 text-uppercase small fw-semibold">Registered Students</h6>
+            <h3 class="fw-bold mb-0"><%= totalStudents %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Campus Drives List -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold mb-0">Campus Drives Management</h5>
+      <span class="badge bg-secondary rounded-pill"><%= drives.length %> Drives</span>
+    </div>
+    <div class="card-body p-0">
+      <% if (drives && drives.length > 0) { %>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th scope="col" class="ps-3">Company & Role</th>
+                <th scope="col">Package</th>
+                <th scope="col">Criteria (10th/12th/UG/PG)</th>
+                <th scope="col">Max Backlogs</th>
+                <th scope="col">Deadline</th>
+                <th scope="col">Applicants</th>
+                <th scope="col" class="text-end pe-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% drives.forEach(drive => { %>
+                <% const isExpired = new Date(drive.deadline) < new Date(); %>
+                <tr>
+                  <td class="ps-3">
+                    <div class="fw-bold text-dark"><%= drive.name %></div>
+                    <small class="text-muted"><%= drive.role %></small>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border"><%= drive.package %></span>
+                  </td>
+                  <td>
+                    <small class="text-muted">
+                      <%= drive.criteria.minTenthPercentage %>% / 
+                      <%= drive.criteria.minTwelfthPercentage %>% / 
+                      <%= drive.criteria.minUgCgpa %> CGPA / 
+                      <%= drive.criteria.minPgCgpa %> CGPA
+                    </small>
+                  </td>
+                  <td>
+                    <span class="badge bg-secondary-subtle text-secondary">
+                      &le; <%= drive.criteria.maxBacklogs %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (isExpired) { %>
+                      <span class="badge bg-danger-subtle text-danger">Closed (<%= new Date(drive.deadline).toLocaleDateString() %>)</span>
+                    <% } else { %>
+                      <span class="badge bg-success-subtle text-success"><%= new Date(drive.deadline).toLocaleDateString() %></span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="badge bg-primary rounded-pill"><%= drive.applicantCount %></span>
+                  </td>
+                  <td class="text-end pe-3">
+                    <div class="btn-group" role="group">
+                      <a href="/drives/<%= drive._id %>/shortlist" class="btn btn-sm btn-outline-success" title="Shortlist Candidates">
+                        <i class="fa-solid fa-list-check me-1"></i> Shortlist
+                      </a>
+                      <a href="/drives/<%= drive._id %>/edit" class="btn btn-sm btn-outline-secondary" title="Edit Drive">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </a>
+                      <form action="/drives/<%= drive._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this drive for <%= drive.name %>?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Drive">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="text-center py-5">
+          <i class="fa-solid fa-briefcase fs-1 text-muted mb-3 d-block"></i>
+          <h5 class="fw-bold">No campus drives created yet</h5>
+          <p class="text-muted small mb-3">Create your first campus recruitment drive to get started.</p>
+          <a href="/drives/new" class="btn btn-primary rounded-3">
+            <i class="fa-solid fa-plus me-1"></i> Create First Drive
+          </a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

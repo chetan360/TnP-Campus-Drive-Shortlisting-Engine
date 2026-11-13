@@ -9,6 +9,7 @@ require("dotenv").config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -22,7 +23,10 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("./models/user.js");
 const authRouter = require("./routes/auth");
 const shortlistingRouter = require("./routes/shortlist");
-const { saveRedirectUrl } = require("./middleware");
+const driveRouter = require("./routes/drive");
+const { getAdminDashboard, submitApplication } = require("./controllers/driveController");
+const { isLoggedIn, saveRedirectUrl } = require("./middleware");
+const ExpressError = require("./utils/ExpressError");
 
 const dbUrl = process.env.DB_URL;
 if (!dbUrl || !process.env.SECRET) {
@@ -37,7 +41,7 @@ main()
     console.log("MongoDB is connected");
   })
   .catch((err) => {
-    console.log(err);
+    console.log("MongoDB connection error:", err.message);
   });
 
 const store = MongoStore.create({
@@ -53,7 +57,7 @@ const sessionOptions = {
   store,
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7,
@@ -66,6 +70,7 @@ app.use(flash());
 app.use(saveRedirectUrl);
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.messages = req.flash();
@@ -83,7 +88,7 @@ passport.use(
     } catch (err) {
       return done(err);
     }
-  }),
+  })
 );
 
 if (
@@ -112,8 +117,8 @@ if (
         } catch (err) {
           return done(err);
         }
-      },
-    ),
+      }
+    )
   );
 }
 
@@ -124,32 +129,51 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id); // Fetch the user from the database
-    done(null, user); // Pass the user to the done callback
+    const user = await User.findById(id);
+    done(null, user);
   } catch (err) {
-    done(err, null); // Handle any potential errors by passing them to done
+    done(err, null);
   }
 });
 
-app.use(methodOverride("_method"));
+// Primary Home Route
+app.get("/", (req, res) => {
+  res.render("home");
+});
+
+// Mount Feature Routers
 app.use("/auth", authRouter);
 app.use("/shortlist", shortlistingRouter);
+app.use("/drives", driveRouter);
 
+// Drive route aliases
+app.get("/drive/apply", (req, res) => res.redirect("/drives"));
+app.get("/drive/result", (req, res) => res.redirect("/drives/results"));
+app.get("/drive/apply/:id", (req, res) => res.redirect(`/drives/${req.params.id}/apply`));
+app.post("/drive/apply/:id", submitApplication);
+
+// Admin dashboard shortcut route
+app.get("/admin/dashboard", isLoggedIn, getAdminDashboard);
+
+// 404 Catch-all handler
+app.all("*", (req, res, next) => {
+  next(new ExpressError(404, "Page Not Found"));
+});
+
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(err.statusCode || 500).render("error", {
-    message: "Something went wrong.",
+  const { statusCode = 500, message = "Something went wrong." } = err;
+  res.status(statusCode).render("error", {
+    message: err.message || message,
   });
 });
 
 if (require.main === module) {
-  app.listen(3000, () => {
-    console.log("server is listening on 3000");
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`);
   });
 }
-
-app.get("/", (req, res) => {
-  res.render("home");
-});
 
 module.exports = app;

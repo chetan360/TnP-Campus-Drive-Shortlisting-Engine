@@ -1,0 +1,174 @@
+<% layout("./layouts/boilerplate") %>
+
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold mb-0">Edit Campus Drive</h4>
+            <a href="/admin/dashboard" class="btn btn-outline-secondary btn-sm">
+              <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <form action="/drives/<%= drive._id %>?_method=PUT" method="POST" class="needs-validation" novalidate>
+            <!-- Basic Information -->
+            <h5 class="fw-bold text-primary mb-3">Company Information</h5>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="name" class="form-label fw-semibold">Company Name *</label>
+                <input
+                  type="text"
+                  class="form-control rounded-3"
+                  id="name"
+                  name="name"
+                  value="<%= drive.name %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="role" class="form-label fw-semibold">Job Role / Designation *</label>
+                <input
+                  type="text"
+                  class="form-control rounded-3"
+                  id="role"
+                  name="role"
+                  value="<%= drive.role %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="package" class="form-label fw-semibold">Compensation Package *</label>
+                <input
+                  type="text"
+                  class="form-control rounded-3"
+                  id="package"
+                  name="package"
+                  value="<%= drive.package %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="deadline" class="form-label fw-semibold">Application Deadline *</label>
+                <% 
+                  const deadlineDate = new Date(drive.deadline);
+                  const formattedDate = deadlineDate.toISOString().split('T')[0];
+                %>
+                <input
+                  type="date"
+                  class="form-control rounded-3"
+                  id="deadline"
+                  name="deadline"
+                  value="<%= formattedDate %>"
+                  required
+                />
+              </div>
+
+              <div class="col-12">
+                <label for="description" class="form-label fw-semibold">Drive Description *</label>
+                <textarea
+                  class="form-control rounded-3"
+                  id="description"
+                  name="description"
+                  rows="3"
+                  required
+                ><%= drive.description %></textarea>
+              </div>
+            </div>
+
+            <!-- Eligibility Criteria -->
+            <h5 class="fw-bold text-primary mb-3">Eligibility Criteria</h5>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="minTenthPercentage" class="form-label fw-semibold">Min 10th Percentage (%) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  class="form-control rounded-3"
+                  id="minTenthPercentage"
+                  name="minTenthPercentage"
+                  value="<%= drive.criteria.minTenthPercentage %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label for="minTwelfthPercentage" class="form-label fw-semibold">Min 12th / Diploma Percentage (%) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  class="form-control rounded-3"
+                  id="minTwelfthPercentage"
+                  name="minTwelfthPercentage"
+                  value="<%= drive.criteria.minTwelfthPercentage %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label for="minUgCgpa" class="form-label fw-semibold">Min UG CGPA *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  class="form-control rounded-3"
+                  id="minUgCgpa"
+                  name="minUgCgpa"
+                  value="<%= drive.criteria.minUgCgpa %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label for="minPgCgpa" class="form-label fw-semibold">Min PG CGPA *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  class="form-control rounded-3"
+                  id="minPgCgpa"
+                  name="minPgCgpa"
+                  value="<%= drive.criteria.minPgCgpa %>"
+                  required
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label for="maxBacklogs" class="form-label fw-semibold">Max Active Backlogs *</label>
+                <input
+                  type="number"
+                  min="0"
+                  class="form-control rounded-3"
+                  id="maxBacklogs"
+                  name="maxBacklogs"
+                  value="<%= drive.criteria.maxBacklogs %>"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-end gap-2">
+              <a href="/admin/dashboard" class="btn btn-outline-secondary rounded-3 px-4">Cancel</a>
+              <button type="submit" class="btn btn-primary rounded-3 px-4">
+                <i class="fa-solid fa-save me-1"></i> Update Drive
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

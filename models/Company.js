@@ -5,11 +5,16 @@ const companySchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     role: { type: String, required: true },
-    minTenthPercentage: { type: Number, required: true },
-    minTwelfthPercentage: { type: Number, required: true },
-    minUgCgpa: { type: Number, required: true },
-    minPgCgpa: { type: Number, required: true },
-    maxBacklogs: { type: Number, default: 0 },
+    criteria: {
+      minTenthPercentage: { type: Number, required: true },
+      minTwelfthPercentage: { type: Number, required: true },
+      minUgCgpa: { type: Number, required: true },
+      minPgCgpa: { type: Number, required: true },
+      maxBacklogs: { type: Number, default: 0 },
+    },
+    package: { type: String, required: true },
+    description: { type: String, required: true },
+    deadline: { type: Date, required: true },
   },
   { timestamps: true },
 );

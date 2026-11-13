@@ -14,8 +14,10 @@ router.post(
     failureFlash: true,
   }),
   (req, res) => {
-    res.redirect(req.session.redirectUrl || "/shortlist");
+    req.flash("success", "Welcome back to TnP Admin Dashboard!");
+    const redirectUrl = req.session.redirectUrl || "/admin/dashboard";
     delete req.session.redirectUrl;
+    res.redirect(redirectUrl);
   },
 );
 
@@ -31,7 +33,8 @@ router.post("/signup", async (req, res, next) => {
     await user.save();
     req.login(user, (err) => {
       if (err) return next(err);
-      return res.redirect("/shortlist");
+      req.flash("success", "Admin account created successfully!");
+      return res.redirect("/admin/dashboard");
     });
   } catch (err) {
     return next(err);
@@ -56,13 +59,15 @@ router.get("/google/callback", (req, res, next) => {
     failureRedirect: "/auth/login",
   })(req, res, (err) => {
     if (err) return next(err);
-    return res.redirect("/shortlist");
+    req.flash("success", "Logged in with Google successfully!");
+    return res.redirect("/admin/dashboard");
   });
 });
 
 router.post("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) return next(err);
+    req.flash("success", "You have logged out successfully.");
     return res.redirect("/auth/login");
   });
 });

@@ -12,6 +12,12 @@ const studentSchema = new mongoose.Schema(
     pgCgpa: { type: Number, required: true },
     resumeLink: { type: String, required: true },
     activeBacklogs: { type: Number, default: 0 },
+    appliedDrives: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Company",
+      },
+    ],
   },
   { timestamps: true },
 );

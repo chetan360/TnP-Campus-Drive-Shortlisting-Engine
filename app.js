@@ -22,6 +22,7 @@ const { addUsername } = require("./utils/usernameBloomFilter");
 const authRouter = require("./routes/auth");
 const shortlistingRouter = require("./routes/shortlist");
 const driveRouter = require("./routes/drive");
+const experienceRouter = require("./routes/experience");
 const { getAdminDashboard, submitApplication } = require("./controllers/driveController");
 const { isLoggedIn, saveRedirectUrl } = require("./middleware");
 const ExpressError = require("./utils/ExpressError");
@@ -144,6 +145,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRouter);
 app.use("/shortlist", shortlistingRouter);
 app.use("/drives", driveRouter);
+app.use("/experiences", experienceRouter);
 
 // Drive route aliases
 app.get("/drive/apply", (req, res) => res.redirect("/drives"));

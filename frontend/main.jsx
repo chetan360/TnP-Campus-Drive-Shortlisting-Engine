@@ -22,6 +22,9 @@ import DriveCatalog from "./pages/DriveCatalog";
 import Home from "./pages/Home";
 import Application from "./pages/Application";
 import Login from "./pages/Login";
+import InterviewExperiences from "./pages/InterviewExperiences";
+import InterviewExperienceForm from "./pages/InterviewExperienceForm";
+import InterviewExperienceDetail from "./pages/InterviewExperienceDetail";
 
 const routes = [
   ["/", Home],
@@ -35,6 +38,9 @@ const routes = [
   ["/drives/:id/apply", Application],
   ["/drives/:id/shortlist", DriveShortlist],
   ["/shortlist", Shortlist],
+  ["/experiences", InterviewExperiences],
+  ["/experiences/new", InterviewExperienceForm],
+  ["/experiences/:id", InterviewExperienceDetail],
   ["*", ErrorPage],
 ];
 

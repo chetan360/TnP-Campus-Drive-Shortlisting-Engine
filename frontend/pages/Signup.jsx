@@ -1,7 +1,60 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Signup() {
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState({
+    state: "idle",
+    message: "",
+  });
+
+  useEffect(() => {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
+      setUsernameStatus({ state: "idle", message: "" });
+      return undefined;
+    }
+    if (trimmedUsername.length < 3) {
+      setUsernameStatus({
+        state: "invalid",
+        message: "Username must contain at least 3 characters.",
+      });
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setUsernameStatus({ state: "checking", message: "Checking username…" });
+      try {
+        const response = await fetch(
+          `/auth/check-username?username=${encodeURIComponent(trimmedUsername)}`,
+          { signal: controller.signal },
+        );
+        const result = await response.json();
+        setUsernameStatus({
+          state: result.available ? "available" : "unavailable",
+          message: result.message,
+        });
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setUsernameStatus({
+            state: "error",
+            message: "Could not check the username. Please try again.",
+          });
+        }
+      }
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [username]);
+
+  const usernameUnavailable = ["invalid", "unavailable", "checking"].includes(
+    usernameStatus.state,
+  );
+
   return (
     <div className="clerk-auth-container">
       <div className="clerk-auth-card">
@@ -62,8 +115,34 @@ export default function Signup() {
               className="form-control"
               id="username"
               required
+              minLength="3"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              aria-describedby="username-status"
+              aria-invalid={usernameStatus.state === "unavailable"}
               placeholder="Enter your username"
             />
+            <div
+              id="username-status"
+              className={`username-status username-status--${usernameStatus.state}`}
+              aria-live="polite"
+            >
+              {usernameStatus.state === "checking" && (
+                <i className="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+              )}
+              {usernameStatus.state === "available" && (
+                <i className="fa-solid fa-circle-check" aria-hidden="true"></i>
+              )}
+              {["invalid", "unavailable", "error"].includes(
+                usernameStatus.state,
+              ) && (
+                <i
+                  className="fa-solid fa-circle-exclamation"
+                  aria-hidden="true"
+                ></i>
+              )}
+              <span>{usernameStatus.message}</span>
+            </div>
           </div>
 
           <div className="mb-4">
@@ -94,7 +173,11 @@ export default function Signup() {
             />
           </div>
 
-          <button type="submit" className="clerk-submit-btn mt-6">
+          <button
+            type="submit"
+            className="clerk-submit-btn mt-6"
+            disabled={usernameUnavailable}
+          >
             <span>Continue</span>
             <i className="fa-solid fa-play" style={{ fontSize: "0.65rem" }}></i>
           </button>

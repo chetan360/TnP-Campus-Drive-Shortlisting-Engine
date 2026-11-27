@@ -2,11 +2,37 @@ const renderReact = require("../utils/renderReact");
 const express = require("express");
 const passport = require("passport");
 const User = require("../models/user");
+const {
+  addUsername,
+  usernameExists,
+} = require("../utils/usernameBloomFilter");
 
 const router = express.Router();
 
 router.get("/login", (req, res) => renderReact(res, "Login"));
 router.get("/signup", (req, res) => renderReact(res, "Signup"));
+
+router.get("/check-username", async (req, res, next) => {
+  try {
+    const username = String(req.query.username || "").trim();
+    if (username.length < 3) {
+      return res.status(400).json({
+        available: false,
+        message: "Username must contain at least 3 characters.",
+      });
+    }
+
+    const exists = await usernameExists(User, username);
+    return res.json({
+      available: !exists,
+      message: exists
+        ? "This username is already registered."
+        : "Username is available.",
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 router.post(
   "/login",
@@ -24,20 +50,34 @@ router.post(
 
 router.post("/signup", async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
+    const username = String(req.body.username || "").trim();
+    const { email, password } = req.body;
     if (!username || !email || !password) {
       req.flash("error", "Username, email, and password are required.");
+      return res.redirect("/auth/signup");
+    }
+    if (username.length < 3) {
+      req.flash("error", "Username must contain at least 3 characters.");
+      return res.redirect("/auth/signup");
+    }
+    if (await usernameExists(User, username)) {
+      req.flash("error", "Username already exists. Please choose another one.");
       return res.redirect("/auth/signup");
     }
     const user = new User({ username, email });
     user.setPassword(password);
     await user.save();
+    addUsername(username);
     req.login(user, (err) => {
       if (err) return next(err);
       req.flash("success", "Admin account created successfully!");
       return res.redirect("/admin/dashboard");
     });
   } catch (err) {
+    if (err?.code === 11000 && err?.keyPattern?.username) {
+      req.flash("error", "Username already exists. Please choose another one.");
+      return res.redirect("/auth/signup");
+    }
     return next(err);
   }
 });

@@ -18,6 +18,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("./models/user.js");
+const { addUsername } = require("./utils/usernameBloomFilter");
 const authRouter = require("./routes/auth");
 const shortlistingRouter = require("./routes/shortlist");
 const driveRouter = require("./routes/drive");
@@ -109,6 +110,7 @@ if (
               email: profile.emails?.[0]?.value,
               googleId: profile.id,
             });
+            addUsername(user.username);
           }
           return done(null, user);
         } catch (err) {

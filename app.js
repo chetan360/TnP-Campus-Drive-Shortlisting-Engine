@@ -1,8 +1,8 @@
+const renderReact = require("./utils/renderReact");
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
-const ejsMate = require("ejs-mate");
 const methodOverride = require("method-override");
 const flash = require("connect-flash");
 require("dotenv").config();
@@ -10,10 +10,7 @@ require("dotenv").config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.engine("ejs", ejsMate);
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), { index: false }));
 
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
@@ -138,7 +135,7 @@ passport.deserializeUser(async (id, done) => {
 
 // Primary Home Route
 app.get("/", (req, res) => {
-  res.render("home");
+  renderReact(res, "Home");
 });
 
 // Mount Feature Routers
@@ -164,9 +161,8 @@ app.all("*", (req, res, next) => {
 app.use((err, req, res, next) => {
   console.error(err);
   const { statusCode = 500, message = "Something went wrong." } = err;
-  res.status(statusCode).render("error", {
-    message: err.message || message,
-  });
+  res.status(statusCode);
+  renderReact(res, "ErrorPage", { message: err.message || message });
 });
 
 if (require.main === module) {

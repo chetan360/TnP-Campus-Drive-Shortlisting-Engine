@@ -1,3 +1,4 @@
+const renderReact = require("../utils/renderReact");
 const Company = require("../models/Company");
 const Student = require("../models/Student");
 
@@ -5,7 +6,7 @@ const Student = require("../models/Student");
 const getAllDrives = async (req, res, next) => {
   try {
     const companies = await Company.find({}).sort({ deadline: 1 });
-    res.render("drives/alldrives", { companies });
+    renderReact(res, "DriveCatalog", { companies });
   } catch (err) {
     next(err);
   }
@@ -33,7 +34,7 @@ const getAdminDashboard = async (req, res, next) => {
       })
     );
 
-    res.render("admin/dashboard", {
+    renderReact(res, "Dashboard", {
       drives: drivesWithApplicantCount,
       totalStudents,
       totalDrives: drives.length,
@@ -46,7 +47,7 @@ const getAdminDashboard = async (req, res, next) => {
 
 // Render form to create a new drive
 const renderNewDriveForm = (req, res) => {
-  res.render("drives/new");
+  renderReact(res, "DriveForm");
 };
 
 // Create a new drive in database
@@ -102,7 +103,7 @@ const renderEditDriveForm = async (req, res, next) => {
       req.flash("error", "Drive not found.");
       return res.redirect("/admin/dashboard");
     }
-    res.render("drives/edit", { drive });
+    renderReact(res, "DriveForm", { drive });
   } catch (err) {
     next(err);
   }
@@ -189,7 +190,7 @@ const renderApplyForm = async (req, res, next) => {
       req.flash("error", "Drive not found or has been closed.");
       return res.redirect("/drives");
     }
-    res.render("drives/apply", { drive });
+    renderReact(res, "Application", { drive });
   } catch (err) {
     next(err);
   }
@@ -297,7 +298,7 @@ const renderDriveShortlist = async (req, res, next) => {
       pgCgpa: -1,
     });
 
-    res.render("drives/shortlistResult", {
+    renderReact(res, "DriveShortlist", {
       drive,
       shortlistedStudents,
       filterScope: appliedCount > 0 ? "applicants" : "all_students",
@@ -312,7 +313,7 @@ const renderDriveShortlist = async (req, res, next) => {
 const renderPublicResults = async (req, res, next) => {
   try {
     const drives = await Company.find({}).sort({ deadline: -1 });
-    res.render("drives/results", { drives });
+    renderReact(res, "Results", { drives });
   } catch (err) {
     next(err);
   }

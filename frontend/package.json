@@ -1,0 +1,17 @@
+{
+  "name": "campusflow-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router-dom": "6.30.6"
+  },
+  "devDependencies": {
+    "tailwindcss": "3.4.19",
+    "esbuild": "0.27.7"
+  }
+}

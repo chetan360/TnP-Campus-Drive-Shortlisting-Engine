@@ -1,11 +1,12 @@
+const renderReact = require("../utils/renderReact");
 const express = require("express");
 const passport = require("passport");
 const User = require("../models/user");
 
 const router = express.Router();
 
-router.get("/login", (req, res) => res.render("users/login"));
-router.get("/signup", (req, res) => res.render("users/signup"));
+router.get("/login", (req, res) => renderReact(res, "Login"));
+router.get("/signup", (req, res) => renderReact(res, "Signup"));
 
 router.post(
   "/login",

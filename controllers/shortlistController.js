@@ -1,3 +1,4 @@
+const renderReact = require("../utils/renderReact");
 const Student = require("../models/Student");
 const Company = require("../models/Company");
 
@@ -13,7 +14,7 @@ const criteriaConfig = [
 const renderShortlistPage = async (req, res, next) => {
   try {
     const drives = await Company.find({}).sort({ name: 1 });
-    res.render("shortlist/index", {
+    renderReact(res, "Shortlist", {
       drives,
       criteria: {
         minTenthPercentage: 60,
@@ -89,7 +90,7 @@ const shortlistStudents = async (req, res) => {
 
     // Otherwise render web page with shortlisted results
     const drives = await Company.find({}).sort({ name: 1 });
-    return res.render("shortlist/index", {
+    return renderReact(res, "Shortlist", {
       drives,
       criteria: values,
       shortlisted,

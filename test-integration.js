@@ -41,6 +41,7 @@ async function runTests() {
           port: 3001,
           ...options,
           headers: {
+            Accept: "application/json",
             ...options.headers,
             ...(sessionCookie ? { Cookie: sessionCookie } : {}),
             ...(postData
@@ -75,6 +76,10 @@ async function runTests() {
     });
   }
 
+  function page(body) {
+    return JSON.parse(body);
+  }
+
   try {
     console.log("\n--- TEST 1: GET / (Home Page) ---");
     let res = await request({ method: "GET", path: "/" });
@@ -88,7 +93,6 @@ async function runTests() {
 
     console.log("\n--- TEST 3: GET /drives/results (Results View) ---");
     res = await request({ method: "GET", path: "/drives/results" });
-    console.log(`Status: ${res.statusCode} | Includes 'Results & Updates': ${res.body.includes("Results & Updates")}`);
     if (res.statusCode !== 200) throw new Error("GET /drives/results failed");
 
     console.log("\n--- TEST 4: POST /auth/login (Admin Login) ---");
@@ -101,8 +105,7 @@ async function runTests() {
 
     console.log("\n--- TEST 5: GET /admin/dashboard (Admin Dashboard) ---");
     res = await request({ method: "GET", path: "/admin/dashboard" });
-    console.log(`Status: ${res.statusCode} | Includes 'TnP Admin Dashboard': ${res.body.includes("TnP Admin Dashboard")}`);
-    if (res.statusCode !== 200 || !res.body.includes("Campus Drives Management")) {
+    if (res.statusCode !== 200 || page(res.body).page !== "Dashboard" || !Array.isArray(page(res.body).data.drives)) {
       throw new Error("Admin Dashboard view failed");
     }
 
@@ -180,7 +183,6 @@ async function runTests() {
 
     console.log("\n--- TEST 10: GET & POST /shortlist (Interactive Shortlisting Engine) ---");
     res = await request({ method: "GET", path: "/shortlist" });
-    console.log(`Status: ${res.statusCode} | Includes 'Set Shortlisting Cutoffs': ${res.body.includes("Set Shortlisting Cutoffs")}`);
     if (res.statusCode !== 200) throw new Error("GET /shortlist failed");
 
     const shortlistData = new URLSearchParams({
@@ -191,8 +193,7 @@ async function runTests() {
       maxBacklogs: "0",
     }).toString();
     res = await request({ method: "POST", path: "/shortlist" }, shortlistData);
-    console.log(`Status: ${res.statusCode} | Includes 'Shortlisted Students': ${res.body.includes("Shortlisted Students")}`);
-    if (res.statusCode !== 200 || !res.body.includes("Shortlisted Students")) {
+    if (res.statusCode !== 200 || !JSON.parse(res.body).success || !JSON.parse(res.body).data.some(student => student.rollNo === "CS2026-099")) {
       throw new Error("POST /shortlist web view failed");
     }
 
@@ -210,11 +211,12 @@ async function runTests() {
     server.close();
     await mongoose.connection.close();
     mongod.kill();
-    process.exit(0);
+    // Let assertion failures propagate to the test runner.
   }
 }
 
-runTests().catch((err) => {
+runTests().then(() => process.exit(0)).catch((err) => {
   console.error("Test failure:", err);
   process.exit(1);
 });
+

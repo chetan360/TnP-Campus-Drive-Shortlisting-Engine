@@ -754,3 +754,30 @@ a:hover {
   color: var(--primary-color);
   transform: translateY(-1px);
 }
+.username-status {
+  align-items: center;
+  display: flex;
+  font-size: 0.82rem;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+  min-height: 1.2rem;
+}
+
+.username-status--available {
+  color: #15803d;
+}
+
+.username-status--checking {
+  color: #475569;
+}
+
+.username-status--invalid,
+.username-status--unavailable,
+.username-status--error {
+  color: #dc2626;
+}
+
+.clerk-submit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

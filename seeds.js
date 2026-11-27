@@ -3,6 +3,7 @@ require("dotenv").config();
 const User = require("./models/user");
 const Company = require("./models/Company");
 const Student = require("./models/Student");
+const InterviewExperience = require("./models/InterviewExperience");
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/TnP";
 
@@ -14,7 +15,10 @@ async function seedDatabase() {
   await User.deleteMany({});
   await Company.deleteMany({});
   await Student.deleteMany({});
-  console.log("Cleared existing users, companies, and students.");
+  await InterviewExperience.deleteMany({});
+  console.log(
+    "Cleared existing users, companies, students, and interview experiences.",
+  );
 
   // Create default admin user
   const admin = new User({
@@ -146,6 +150,74 @@ async function seedDatabase() {
 
   await Student.insertMany(students);
   console.log(`Created ${students.length} sample students with varied profiles.`);
+
+  const interviewExperiences = [
+    {
+      name: "Ananya Joshi",
+      email: "ananya.joshi@example.com",
+      content: `# Google SDE Interview Experience
+
+I interviewed for the **Software Development Engineer** role through our campus placement drive. The complete process took two days.
+
+## Online assessment
+
+- Two data-structure problems in 90 minutes
+- One problem used sliding window
+- The second problem required graphs and BFS
+
+## Technical interviews
+
+The first round focused on arrays, hash maps, and explaining the time complexity of my solution. In the second round, I designed a small URL shortener and discussed database choices.
+
+> The interviewers cared as much about clear communication as the final answer.
+
+## My preparation advice
+
+Practice writing complete solutions without an IDE, revise core CS subjects, and always explain your assumptions before coding.`,
+    },
+    {
+      name: "Rahul Patil",
+      email: "rahul.patil@example.com",
+      content: `# TCS Digital Interview Experience
+
+The selection process included an aptitude test, a coding round, and one combined technical and HR interview.
+
+## Questions I received
+
+1. Explain the four pillars of OOP.
+2. Write a SQL query using a join.
+3. Describe my final-year project and my contribution.
+4. Explain REST APIs and common HTTP methods.
+
+## Final takeaway
+
+Be confident about everything written on your resume. The panel asked several follow-up questions about my project, but the overall conversation was friendly.`,
+    },
+    {
+      name: "Meera Shah",
+      email: "meera.shah@example.com",
+      content: `# Microsoft Cloud Role Interview Experience
+
+I applied for a cloud-focused graduate role. There were three rounds after the initial resume shortlist.
+
+## Round overview
+
+- **Round 1:** Coding and problem solving
+- **Round 2:** Operating systems, networking, and cloud fundamentals
+- **Round 3:** Managerial discussion and behavioural questions
+
+## A useful question
+
+The interviewer asked how I would investigate a web application that suddenly became slow. I structured the answer around metrics, logs, database queries, and network latency.
+
+## Advice for future candidates
+
+Use the STAR method for behavioural answers and prepare two strong project stories with measurable outcomes.`,
+    },
+  ];
+
+  await InterviewExperience.insertMany(interviewExperiences);
+  console.log("Created 3 sample interview experiences.");
 
   await mongoose.connection.close();
   console.log("Seeding complete and database connection closed.");
